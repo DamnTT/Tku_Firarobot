@@ -149,6 +149,7 @@ class Strategy(object):
     while not rospy.is_shutdown():      
       self.robot.PubCurrentState()
       targets = self.robot.GetObjectInfo()
+      
       position = self.robot.GetRobotInfo()
       twopoint = self.robot.GetTwopoint()
       state = self.robot.game_state

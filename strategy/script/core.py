@@ -49,6 +49,7 @@ class Core(Robot, StateMachine):
     self.maximum_v = config['maximum_v']
     self.orb_attack_ang = config['orb_attack_ang']
     self.atk_shoot_ang = config['atk_shoot_ang']
+    self.my_job        = config['role']
     self.my_role       = config['role']
     self.atk_shoot_dis = config['atk_shoot_dis']
     self.accelerate = config['Accelerate']
@@ -79,7 +80,7 @@ class Core(Robot, StateMachine):
   def on_toChase(self, method = "Classic"):
     t = self.GetObjectInfo()
     side = self.opp_side
-    self.my_role = MyRole(rospy.get_namespace())
+    self.my_job = MyRole(rospy.get_namespace())
     if method == "Classic":
       x, y, yaw = self.CC.ClassicRounding(t[side]['ang'],\
                                           t['ball']['dis'],\
@@ -104,7 +105,7 @@ class Core(Robot, StateMachine):
     t = self.GetObjectInfo()
     side = self.opp_side
     l = self.GetObstacleInfo()
-    self.my_role = MyRole(rospy.get_namespace())
+    self.my_job = MyRole(rospy.get_namespace())
     if method == "Classic":
       x, y, yaw = self.AC.ClassicAttacking(t[side]['dis'], t[side]['ang'])
     elif method == "Cut":
@@ -123,11 +124,11 @@ class Core(Robot, StateMachine):
     self.MotionCtrl(x, y, yaw)
 
   def on_toShoot(self, power, pos = 1):
-    self.my_role = MyRole(rospy.get_namespace())
+    self.my_job = MyRole(rospy.get_namespace())
     self.RobotShoot(power, pos)
 
   def on_toMovement(self, method):
-    self.my_role = MyRole(rospy.get_namespace())
+    self.my_job = MyRole(rospy.get_namespace())
     t = self.GetObjectInfo() 
     position = self.GetRobotInfo()
     side = self.opp_side
@@ -165,7 +166,7 @@ class Core(Robot, StateMachine):
       self.MotionCtrl(x, y, yaw)
 
   def on_toPoint(self):
-    self.my_role = MyRole(rospy.get_namespace())
+    self.my_job = MyRole(rospy.get_namespace())
     t = self.GetObjectInfo()
     our_side = self.our_side
     opp_side = self.opp_side
@@ -234,11 +235,11 @@ class Strategy(object):
   def RunStatePoint(self):
     print("run point")
     if self.robot.run_point == "ball_hand":
-      if self.robot.toPoint:
+      if self.robot.toPoint():
         self.dclient.update_configuration({"run_point": "none"})
         self.ToMovement(role)
     elif self.robot.run_point == "empty_hand":
-      if self.robot.toPoint:
+      if self.robot.toPoint():
         self.dclient.update_configuration({"run_point": "none"})
         self.ToChase(role)
 
@@ -308,7 +309,7 @@ class Strategy(object):
       state = self.robot.game_state
       laser = self.robot.GetObstacleInfo()
       point = self.robot.run_point
-      role = self.robot.my_role
+      role = self.robot.my_job
       shooting_start = self.robot.shooting_start
       # Can not find ball when starting
       if targets is None or targets['ball']['ang'] == 999 and self.robot.game_start:
