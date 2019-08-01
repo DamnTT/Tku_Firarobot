@@ -52,12 +52,15 @@ class Core(Robot, StateMachine):
     self.my_job        = config['role']
     self.my_role       = config['role']
     self.atk_shoot_dis = config['atk_shoot_dis']
+    self.my_role       = config['role']
     self.accelerate = config['Accelerate']
     self.ball_speed = config['ball_pwm']
 
     self.ChangeVelocityRange(config['minimum_v'], config['maximum_v'])
     self.ChangeAngularVelocityRange(config['minimum_w'], config['maximum_w'])
     self.ChangeBallhandleCondition(config['ballhandle_dis'], config['ballhandle_ang'])
+
+    self.SetMyRole(self.my_role)
 
     return config
 
@@ -300,7 +303,7 @@ class Strategy(object):
       self.robot.PubCurrentState()
       self.robot.Supervisor()
 
-      print("My Namespace: {}, My Role: {}".format(rospy.get_namespace(), self.robot.MyRole(rospy.get_namespace())))
+      print("My Namespace: {}, My Role: {}".format(rospy.get_namespace(), self.robot.MyRole()))
 
       targets = self.robot.GetObjectInfo()
       position = self.robot.GetRobotInfo()
@@ -321,10 +324,11 @@ class Strategy(object):
 
         if self.robot.is_idle:          
           if self.robot.game_start:
-            if shooting_start:
+            if state == "Kick_Off" or "Throw_In":
+              if self.robot.CheckBallHandle():
+                self.robot.PassingTo("nearest")
+            elif state == "Corner_Kick" or state == "Free_Kick":
               self.robot.toShoot(80)
-              self.dclient.update_configuration({"shooting_start": False})
-
             elif state == "Penalty_Kick":
               self.ToMovement(role)
             elif self.robot.run_point == "empty_hand":
@@ -398,6 +402,7 @@ class Strategy(object):
               self.ToChase(role)
           else:
             self.RunStatePoint()
+
 
       if rospy.is_shutdown():
         log('shutdown')
