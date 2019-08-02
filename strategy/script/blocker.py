@@ -67,8 +67,8 @@ class Core(Robot, StateMachine):
 
   
   def on_toIdle(self):
-    for i in range(0, 10):
-        self.MotionCtrl(0,0,0)
+    position = self.GetRobotInfo()
+    x,y,yaw = self.BK.BlockLimit(position['imu_3d']['yaw'])
     log("To Idle1")
   
   def on_toBlock(self, methods = "Classic"):
@@ -78,26 +78,23 @@ class Core(Robot, StateMachine):
       log("to block classic")
       x, y, yaw = self.BK.ClassicBlocking(t['ball']['dis'],\
                                           t['ball']['ang'],\
-                                          position['location']['yaw'],\
-                                          t['ball']['speed_pwm_y'])
+                                          position['imu_3d']['yaw'])
     elif methods == "Limit":
       log("to block limit")
-      x = 0
-      y = 0
-      yaw = 0
+      x,y,yaw = self.BK.BlockLimit(position['imu_3d']['yaw'])
     
     self.MotionCtrl(x, y, yaw)
 
   def on_toWait(self):
-
-    self.MotionCtrl(0,0,0)
+    position = self.GetRobotInfo()
+    x,y,yaw = self.BK.BlockLimit(position['imu_3d']['yaw'])
 
   def on_toRet(self):
     t = self.GetObjectInfo()
     position = self.GetRobotInfo()
     twopoint = self.GetTwopoint()
 
-    x, y, yaw = self.BK.Return(t[self.our_side]['dis'], t[self.our_side]['ang'], position['location']['yaw'])
+    x, y, yaw = self.BK.Return(t[self.our_side]['dis'], t[self.our_side]['ang'], position['imu_3d']['yaw'])
     self.MotionCtrl(x, y, yaw)
     log("Returnig")
   
@@ -107,10 +104,10 @@ class Core(Robot, StateMachine):
     position = self.GetRobotInfo()
     if state == "Penalty_Kick":
       x, y, yaw = self.BK.GuardPenalting(t['ball']['dis'],\
-                                       t['ball']['ang'])
+                                       t['ball']['ang'],position['imu_3d']['yaw'])
     else:
       x, y, yaw = self.BK.ClassicPushing(t['ball']['dis'],\
-                                       t['ball']['ang'],position['location']['yaw'])
+                                       t['ball']['ang'],position['imu_3d']['yaw'])
     self.MotionCtrl(x, y, yaw)
     log("To Push")
   
@@ -179,9 +176,9 @@ class Strategy(object):
           if targets['ball']['dis'] > 300 and not targets['ball']['dis'] == 999:
             self.robot.toWait()
           else :
-            if twopoint[our_side]['left'] > 115 and twopoint[our_side]['left'] > twopoint[our_side]['right'] and targets['ball']['ang'] <= 0:
+            if twopoint[our_side]['left'] > 120 and twopoint[our_side]['left'] > twopoint[our_side]['right'] and targets['ball']['ang'] <= 0:
               self.robot.toBlock('Limit')
-            elif twopoint[our_side]['right'] > 115 and twopoint[our_side]['left'] < twopoint[our_side]['right'] and targets['ball']['ang'] >= 0:
+            elif twopoint[our_side]['right'] > 120 and twopoint[our_side]['left'] < twopoint[our_side]['right'] and targets['ball']['ang'] >= 0:
               self.robot.toBlock('Limit')
             elif targets['ball']['dis'] <= 45:
                 self.robot.toPush()                 
