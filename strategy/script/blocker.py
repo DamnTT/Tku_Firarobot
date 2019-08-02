@@ -179,9 +179,9 @@ class Strategy(object):
           if targets['ball']['dis'] > 300 and not targets['ball']['dis'] == 999:
             self.robot.toWait()
           else :
-            if twopoint[our_side]['left'] > 115 and twopoint[our_side]['left'] > twopoint[our_side]['right'] and targets['ball']['ang'] <= 0:
+            if twopoint[our_side]['left'] > 120 and twopoint[our_side]['left'] > twopoint[our_side]['right'] and targets['ball']['ang'] <= 0:
               self.robot.toBlock('Limit')
-            elif twopoint[our_side]['right'] > 115 and twopoint[our_side]['left'] < twopoint[our_side]['right'] and targets['ball']['ang'] >= 0:
+            elif twopoint[our_side]['right'] > 120 and twopoint[our_side]['left'] < twopoint[our_side]['right'] and targets['ball']['ang'] >= 0:
               self.robot.toBlock('Limit')
             elif targets['ball']['dis'] <= 45:
                 self.robot.toPush()                 

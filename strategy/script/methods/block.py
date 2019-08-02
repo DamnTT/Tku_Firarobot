@@ -28,9 +28,10 @@ class Block(Robot):
 
   def Return(self,goal_dis, goal_ang, front_ang):
     distance = 70
-    v_x   = distance - abs(goal_dis * math.cos(math.radians(goal_ang)))
-    v_y   = goal_dis * math.sin(math.radians(goal_ang))
-    v_yaw = self.cp_value-front_ang
+    o_x   = distance - abs(goal_dis * math.cos(math.radians(goal_ang)))
+    o_y   = goal_dis * math.sin(math.radians(goal_ang))
+    v_yaw = self.cp_value - front_ang
+    v_x, v_y = self.Rotate(o_x, o_y, front_ang)
     return v_x, v_y, v_yaw
 
   def ClassicPushing(self, ball_dis, ball_ang, front_ang):
