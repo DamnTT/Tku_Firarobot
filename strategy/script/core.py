@@ -246,8 +246,6 @@ class Strategy(object):
       elif role == "Supporter":
         self.ToMovement(role)
 
-          
-
   def ToAttack(self):
     mode = self.robot.attack_mode
     if mode == "Attack" :
@@ -266,8 +264,7 @@ class Strategy(object):
     point = self.robot.run_point
     
     if role == "Supporter":
-      self.robot.toMovement("Relative_goal")
-      
+      self.robot.toMovement("Relative_goal")     
     elif role == "Attacker":
       if state == "Penalty_Kick":
         self.robot.toMovement("Penalty_Kick")
@@ -281,6 +278,7 @@ class Strategy(object):
         self.robot.toMovement("Orbit")
       elif mode == "Fast_break":
         self.ToAttack()
+        
   def main(self):
     while not rospy.is_shutdown():
       self.robot.PubCurrentState()
