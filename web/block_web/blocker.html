@@ -17,44 +17,23 @@
 <link rel="stylesheet" href="css/form.css">
 </head>
 <body>
-rqt_web
+blocker_web
 <div id="WifiLight">
     <canvas id="Light"></canvas>
 </div>
 <form name='form' id='form'>
-  role :
-  <select name="role" id = "role">
-      <option value="Attacker">Attacker</option>
-      <option value="Supporter">Supporter</option>
-      <option value="Passer">Passer</option>  
-  </select><br/>
   game_start:
   <input id ='game_start'   type="checkbox"   onclick = gameStart() ><br/>
-  chase_straight：
-  <input id ='chase_straight'      type="checkbox" value = 'true'  name='chase_straight：' ><br/>
-  Accelerate：
-  <input id ='Accelerate'      type="checkbox" value = 'true'  name='Accelerate：' ><br/>
+  <input type='button' name='submit' value='送出' onclick= processFormData() /><br/>
   ball_pwm：
   <input id ='ball_pwm'      type="checkbox" value = 'true'  name='ball_pwm：' ><br/>
-  shooting_start:
-  <input id ='shooting_start'      type="checkbox" value = 'true'  name='shooting_start' ><br/>
+ locate:
+  <input id ='locate'      type="checkbox" value = 'true'  name='locate' ><br/>
 
   game_state：
   <select name="game_state" id = "game_state">
     　<option value="Kick_Off">Kick_Off</option>
-      <option value="Free_Kick">Free_Kick</option> 
-      <option value="Free_Ball">Free_Ball</option>
-      <option value="Throw_In">Throw_In</option> 
-      <option value="Coner_Kick">Coner_Kick</option>
       <option value="Penalty_Kick">Penalty_Kick</option> 
-  </select><br/>
-
-
-  run_point：
-  <select name="run_point" id="run_point">
-    　<option value="empty_hand">empty_hand</option>
-    　<option value="ball_hand">ball_hand</option>
-    　<option value="none">none</option>
   </select><br/>
 
   run_x：
@@ -72,32 +51,6 @@ rqt_web
     　<option value="Blue">Blue(Attack_Yellow)</option>
     　<option value="Yellow">Yellow(Attack_Blue)</option>
   </select><br/>
-  attack_mode：
-  <select name="attack_mode" id = "attack_mode">
-    　<option value="Attack">Attack</option>
-    　<option value="Orbit">Orbit</option>
-    　<option value="Cut">Cut</option>
-     <option value="Post_up">Post_up</option>
-     <option value="Defense">Defense</option>
-  </select><br/>
-  strategy_mode：
-  <select name="strategy_mode" id = strategy_mode>
-    　<option value="At_Orbit">At_Orbit</option>
-    　<option value="At_Post_up">Post_up</option>
-    　<option value="Defense_ball">Defense_ball</option>
-      <option value="Defense_goal">Defense_goal</option>
-      <option value="Fast_break">Fast_break</option>
-  </select><br/>
-
-  orb_attack_ang：
-  <input id="orb_attack_angSlider" name="orb_attack_ang" type="range" min="0.0" max="20.0" value="5" oninput="ToInputValue(this.value,this.name,1);">
-  <input id="orb_attack_angInput" name="orb_attack_ang"  value="5.0" type="number" min="0.0" max="20.0" oninput="ToSliderValue(this.value,this.name,0);" />0.0 to 20.0<br/>
-  atk_shoot_ang：
-  <input id="atk_shoot_angSlider" name="atk_shoot_ang" type="range" min="0.0" max="10.0" value="10.0" oninput="ToInputValue(this.value,this.name,1);">
-  <input id="atk_shoot_angInput" name="atk_shoot_ang"  value="10.0" type="number" min="0.0" max="10.0" oninput="ToSliderValue(this.value,this.name,0);" />0.0 to 10.0<br/>
-  atk_shoot_dis：
-  <input id="atk_shoot_disSlider" name="atk_shoot_dis" type="range" min="0.0" max="1000.0" value="300" oninput="ToInputValue(this.value,this.name,1);">
-  <input id="atk_shoot_disInput" name="atk_shoot_dis"  value="500" type="number" min="0.0" max="1000.0" oninput="ToSliderValue(this.value,this.name,0);" />0.0 to 1000.0<br/>
   minimum_w：
   <input id="minimum_wSlider" name="minimum_w" type="range" min="0.0" max="5.0" value="1.2" oninput="ToInputValue(this.value,this.name,1);">
   <input id="minimum_wInput" name="minimum_w"  value="1.2" type="number" min="0" max="5.0" oninput="ToSliderValue(this.value,this.name,0);" />0.0 to 5.0<br/>
@@ -110,14 +63,8 @@ rqt_web
   maximum_v：
   <input id="maximum_vSlider" name="maximum_v" type="range" min="10.0" max="100.0" value="50" oninput="ToInputValue(this.value,this.name,1);">
   <input id="maximum_vInput" name="maximum_v"  value="50" type="number" min="10.0" max="100.0" oninput="ToSliderValue(this.value,this.name,0);" />0.0 to 100.0<br/>
-  ballhandle_dis：
-  <input id="ballhandle_disSlider" name="ballhandle_dis" type="range" min="0" max="50" value="28" oninput="ToInputValue(this.value,this.name,1);">
-  <input id="ballhandle_disInput" name="ballhandle_dis"  value="28" type="number" min="0" max="50" oninput="ToSliderValue(this.value,this.name,0);" />0 to 50<br/>
-  ballhandle_ang：
-  <input id="ballhandle_angSlider" name="ballhandle_ang" type="range" min="0" max="50" value="5" oninput="ToInputValue(this.value,this.name,1);">
-  <input id="ballhandle_angInput" name="ballhandle_ang"  value="5" type="number" min="0" max="50" oninput="ToSliderValue(this.value,this.name,0);" />0 to 50<br/>
   
-  <input type='button' name='submit' value='送出' onclick= processFormData() />
+  
 </form>
     <div class="Wifimodal_content">
         <div class="modal-body">
@@ -137,7 +84,7 @@ rqt_web
             <button type="button" class="btn btn-primary" id="send-message" onclick="RobotConnect();history.go(0);">Connect</button>
         </div>
     </div>
-    <script src="js/RobotConnect.js"></script>
+    <script src="js/RobotConnect _block.js"></script>
     <script src="js/variable.js"></script>
 
 </body>

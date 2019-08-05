@@ -19,6 +19,11 @@
          }else{
            myBoolean4 = Boolean(0)
          }
+         if(document.getElementById("shooting_start").checked) {
+            myBoolean5 = Boolean(1);
+          }else{
+            myBoolean5 = Boolean(0)
+          }
 
         
         var chase_straight = new ROSLIB.Message({
@@ -72,6 +77,7 @@
         data: parseFloat(document.getElementById("run_yawInput").value)
         });
 
+
         var game_state = new ROSLIB.Message({
         data: document.getElementById("game_state").value
         });
@@ -87,7 +93,9 @@
         var run_point = new ROSLIB.Message({
         data: document.getElementById("run_point").value
         });
-
+        var role = new ROSLIB.Message({
+        data: document.getElementById("role").value
+        });
 
 
         var request = new ROSLIB.ServiceRequest({
@@ -97,6 +105,7 @@
                 {name: 'chase_straight', value: chase_straight.data},
                 {name: 'Accelerate', value: Accelerate.data},
                 {name: 'ball_pwm', value: ball_pwm.data},
+                {name: 'shooting_start', value: shooting_start.data},
             ],
             ints: [
                 {name: 'ballhandle_dis', value: ballhandle_dis.data},
@@ -108,6 +117,7 @@
                 {name: 'attack_mode', value: attack_mode.data},
                 {name: 'our_side', value: our_side.data},
                 {name: 'run_point', value: run_point.data},
+                {name: 'role', value: role.data},
             ],
             doubles: [
                 {name: 'orb_attack_ang', value: orb_attack_ang.data},

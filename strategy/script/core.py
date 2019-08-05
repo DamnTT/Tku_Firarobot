@@ -134,35 +134,36 @@ class Core(Robot, StateMachine):
     self.my_job = MyRole(rospy.get_namespace())
     t = self.GetObjectInfo() 
     position = self.GetRobotInfo()
-    side = self.opp_side
+    our_side = self.our_side
+    opp_side = self.opp_side
     l = self.GetObstacleInfo()
     log('move')
     if method == "Orbit":
-      x, y, yaw, arrived = self.BC.Orbit(t[side]['ang'])
+      x, y, yaw, arrived = self.BC.Orbit(t[opp_side]['ang'])
       self.MotionCtrl(x, y, yaw, True)
 
     elif method == "Relative_ball":
-      x, y, yaw = self.BC.relative_ball(t[side]['dis'],\
-                                             t[side]['ang'],\
+      x, y, yaw = self.BC.relative_ball(t[our_side]['dis'],\
+                                             t[our_side]['ang'],\
                                              t['ball']['dis'],\
                                              t['ball']['ang'])
       self.MotionCtrl(x, y, yaw)
    
     elif method == "Relative_goal":
-      x, y, yaw = self.BC.relative_goal(t[side]['dis'],\
-                                             t[side]['ang'],\
+      x, y, yaw = self.BC.relative_goal(t[our_side]['dis'],\
+                                             t[our_side]['ang'],\
                                              t['ball']['dis'],\
                                              t['ball']['ang'])
       self.MotionCtrl(x, y, yaw)
 
     elif method == "Penalty_Kick":
-      x, y, yaw = self.BC.PenaltyTurning(side, self.run_yaw)
+      x, y, yaw = self.BC.PenaltyTurning(opp_side, self.run_yaw)
       self.left_ang = abs(yaw)
       self.MotionCtrl(x, y, yaw )
       
     elif method == "At_Post_up":
-      x, y, yaw = self.BC.Post_up(t[side]['dis'],\
-                                       t[side]['ang'],\
+      x, y, yaw = self.BC.Post_up(t[opp_side]['dis'],\
+                                       t[opp_side]['ang'],\
                                        l['ranges'],\
                                        l['angle']['increment'])
       
@@ -173,21 +174,6 @@ class Core(Robot, StateMachine):
     t = self.GetObjectInfo()
     our_side = self.our_side
     opp_side = self.opp_side
-    #if self.game_state == "Kick_Off" and self.our_side == "Yellow" :
-    #  x, y, yaw, arrived = self.BC.Go2Point(-60, 0, 0)
-    #elif self.game_state == "Kick_Off" and self.our_side == "Blue" :
-    #  x, y, yaw, arrived = self.BC.Go2Point(60, 0, 180)
-    #elif self.game_state == "Free_Kick" :
-    #  x, y, yaw, arrived = self.BC.Go2Point(100, 100, 90)
-    #elif self.game_state == "Free_Ball" :
-    #  x, y, yaw, arrived = self.BC.Go2Point(-100, -100, 180)
-    #elif self.game_state == "Throw_In" :
-    #  x, y, yaw, arrived = self.BC.Go2Point(-100, -100, 270)
-    #elif self.game_state == "Coner_Kick":
-    #  x, y, yaw, arrived = self.BC.Go2Point(300, 200, 45)
-    #elif self.game_state == "Penalty_Kick" :
-    #  x, y, yaw, arrived = self.BC.Go2Point(-100, 100, 135)
-    #elif self.game_state == "Run_Specific_Point" :
     if self.run_yaw == 0:
       yaw = t[our_side]['ang']
     elif self.run_yaw == 180:
@@ -280,11 +266,8 @@ class Strategy(object):
     point = self.robot.run_point
     
     if role == "Supporter":
-      if a_mode == "Defense":
-          self.robot.toMovement("Relative_goal")
-      else:
-          self.robot.toMovement("Relative_ball")
-
+      self.robot.toMovement("Relative_goal")
+      
     elif role == "Attacker":
       if state == "Penalty_Kick":
         self.robot.toMovement("Penalty_Kick")
@@ -324,11 +307,13 @@ class Strategy(object):
 
         if self.robot.is_idle:          
           if self.robot.game_start:
-            if state == "Kick_Off" or "Throw_In":
+            if self.robot.shooting_start:
               if self.robot.CheckBallHandle():
-                self.robot.PassingTo("nearest")
-            elif state == "Corner_Kick" or state == "Free_Kick":
-              self.robot.toShoot(80)
+                self.robot.RobotShoot(80, 1)
+              else:
+                for i in range(0,5000):                
+                  self.robot.MotionCtrl(30, 0, 0)
+              self.dclient.update_configuration({"shooting_start": False})
             elif state == "Penalty_Kick":
               self.ToMovement(role)
             elif self.robot.run_point == "empty_hand":
@@ -340,8 +325,6 @@ class Strategy(object):
         if self.robot.is_chase:
           if self.robot.CheckBallHandle():
             print('chase to move')
-            # self.robot.goal_dis = 0
-            # self.robot.Accelerate(0,targets,self.maximum_v) 
             self.ToMovement(role)
           else:
             self.ToChase(role)
