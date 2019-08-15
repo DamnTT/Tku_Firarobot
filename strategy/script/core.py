@@ -215,13 +215,14 @@ class Core(Robot, StateMachine):
     elif t[opp_side]['dis'] >= Core.last_goal_dis:
       if time.time() - Core.last_time >= 3:
         y = time.time()
-        while (time.time() - y) < 1 :
+        while (time.time() - y) < 0.8 :
           self.robot.MotionCtrl(-15, 0, 0)
         self.ChangeVelocityRange(self.minimun, exceed )
         Core.last_goal_dis = 0
     else:
       Core.last_time = time.time()
       Core.last_goal_dis = t[opp_side]['dis']
+
       
   def record_angle(self):
     position = self.GetRobotInfo()
