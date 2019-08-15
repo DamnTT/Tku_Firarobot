@@ -102,7 +102,7 @@ void Localization::sensorCallback(const std_msgs::Int32MultiArray msg)
     bad_point.clear();
     point = msg.data;
     std::vector<MCL::SensorData> mcl_sensor_data;
-    int boundary_error = 0;
+    int boundary_error = 20;
 
     for(int i = 0; i<point.size();i+=2){
         int xl=point[i];
@@ -233,7 +233,7 @@ void Localization::velCallback(const geometry_msgs::Twist msg)
             //if(vx!=0&&vy!=0&&vw!=0){
             //    cout<<"vx,vy,vw = "<<vx<<" "<<vy<<" "<<vw<<endl;
             //}
-            //mcl.updateMotion(vy,vx,vw);
+           // mcl.updateMotion(vy,vx,vw);
             x=x_;
             y=y_;
             w=w_;

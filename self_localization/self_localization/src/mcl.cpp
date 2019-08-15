@@ -78,7 +78,7 @@ void MCL::updateMotion(double vx, double vy, double dw)
   mutex.lock();
   static std::random_device xrd, yrd, wrd;
   //static std::normal_distribution<> xgen(0.0,xvar), ygen(0.0,yvar), wgen(0.0,wvar);
-  static std::normal_distribution<> xgen(-0.6,0.6), ygen(-0.6,0.6), wgen(-1,1);
+  static std::normal_distribution<> xgen(0,20), ygen(0,20), wgen(0,wvar);
   for(auto& p : particles)
   {
     double c = cos(w(p)*TO_RAD);
