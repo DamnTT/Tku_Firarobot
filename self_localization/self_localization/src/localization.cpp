@@ -125,7 +125,7 @@ void Localization::sensorCallback(const std_msgs::Int32MultiArray msg)
     if(mcl_sensor_data.size()>0){
         mcl.updateSensor(mcl_sensor_data);
     }
-    //mcl.updateMotion(0,0,0);
+    mcl.updateMotion(0,0,0);
     
 }
 void Localization::resetCallback(const self_localization::resetParticles msg)
@@ -233,7 +233,7 @@ void Localization::velCallback(const geometry_msgs::Twist msg)
             //if(vx!=0&&vy!=0&&vw!=0){
             //    cout<<"vx,vy,vw = "<<vx<<" "<<vy<<" "<<vw<<endl;
             //}
-            mcl.updateMotion(vy,vx,vw);
+            //mcl.updateMotion(vy,vx,vw);
             x=x_;
             y=y_;
             w=w_;
