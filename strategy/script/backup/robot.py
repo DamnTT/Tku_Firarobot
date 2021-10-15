@@ -38,7 +38,7 @@ CMDVEL_TOPIC = "motion/cmd_vel"
 SHOOT_TOPIC  = "motion/shoot"
 
 class Robot(object):
-  # 球門的左側和右側
+  
   __twopoint_info = {'Blue':{'right' : 0,'left' : 0},
                      'Yellow':{'right' : 0,'left' : 0}}
 
@@ -48,13 +48,11 @@ class Robot(object):
 
   __robot_info  = {'location' : {'x' : 0, 'y' : 0, 'yaw' : 0},
                    'imu_3d' : {'yaw' : 0}}
-# 目標(球、黃球門、藍球門)
   __object_info = {'ball':{'dis' : 0, 'ang' : 0, 'global_x' : 0, 'global_y' : 0, \
                            'speed_x': 0, 'speed_y': 0, 'speed_pwm_x': 0, 'speed_pwm_y': 0},
                    'Blue':{'dis' : 0, 'ang' : 0},
                    'Yellow':{'dis' : 0, 'ang' : 0},
                    'velocity' : 0 }
-# 障礙物(敵方機器人)
   __obstacle_info = {'angle' : {'min' : 0, 'max' : 0, 'increment' : math.pi / 180 * 3},
 		                 'scan' : 0,
 		                 'range' : {'min' : 0, 'max' : 0},
@@ -94,32 +92,32 @@ class Robot(object):
   pid_w = PID(Kp_w, Ki_w, Kd_w, setpoint=Cp_w)
   pid_w.output_limits = (-1*__maximum_w, __maximum_w)
   pid_w.auto_mode = True
-#  PID速度控制器
+
   def TuningVelocityContorller(self, p, i, d, cp = Cp_v):
     self.pid_v.setpoint = cp
     self.pid_v.tunings = (p, i, d)
-#  PID角速度控制器
+
   def TuningAngularVelocityContorller(self, p, i, d, cp = Cp_w):
     self.pid_w.setpoint = cp
     self.pid_w.tunings = (p, i, d)
-# 控制速度在最大速度和做小速度範圍之間
+
   def ChangeVelocityRange(self, m, M):
     self.__minimum_v = m
     self.pid_v.output_limits = (-1*M, M)
-# 控制角速度在最大速度和做小速度範圍之間
+
   def ChangeAngularVelocityRange(self, m, M):
     self.__minimum_w = m
     self.pid_w.output_limits = (-1*M, M)
-# 改變持球條件 當球在指定距離和角度之內 判斷為持球
+
   def ChangeBallhandleCondition(self, dis, ang):
     self.__handle_dis = dis
     self.__handle_ang = ang
-# 顯示資料出來
+
   def ShowRobotInfo(self):
     print("Robot informations: {}".format(self.__robot_info))
     print("Objects informations: {}".format(self.__object_info))
     print("Obstacles informations: {}".format(self.__obstacle_info))
-# 將資料與ROS溝通
+
   def __init__(self, sim = False):
 
     rospy.Subscriber(VISION_TOPIC, Object, self._GetVision)
@@ -146,14 +144,14 @@ class Robot(object):
       rospy.Subscriber("BallIsHandle", Bool, self._CheckBallHandle)
       self.TuningVelocityContorller(1, 0, 0)
       self.TuningAngularVelocityContorller(0.1, 0, 0)
-# 不知道
+
   def _PassingServer(self, req):
     self.MyRole = "Catcher"
     resp = TriggerResponse()
     resp.success = True
     resp.message = "Got it"
     return resp
-# 不知道
+
   def PassingTo(self, catcher_ns):
     self.MyRole = "Passer"
     if catcher_ns is "nearest":
@@ -176,7 +174,7 @@ class Robot(object):
 
     except rospy.ServiceException, e:
       print("Service call failed: {}".format(e))
-# 接收其他兩台機器人的資料
+
   def MulticastReceiver(self, r2_data, r3_data):
     Robot.sync_last_time = time.time()
     self.robot2['ball_is_handled'] = r2_data.ball_is_handled
@@ -202,7 +200,7 @@ class Robot(object):
     elif "robot3" in rospy.get_namespace():
       self.near_robot_ns = "/robot2"
       self.near_robot = self.robot2
-# 機器人分工
+
   def Supervisor(self):
     duration = time.time() - Robot.sync_last_time
     if duration > 5:
@@ -230,7 +228,7 @@ class Robot(object):
         else:
           self.r2_role = "Attacker" if self.robot2['ball_dis'] < self.robot3['ball_dis'] else "Supporter"
           self.r3_role = "Supporter" if self.r2_role is "Attacker" else "Attacker"
-# 沒有用到
+
   def GetState(self, robot_ns):
     if "robot1" in robot_ns.lower():
       return self.robot1
@@ -242,7 +240,7 @@ class Robot(object):
       return self.near_robot
     else:
       print("Wrong Namespace")
-# 沒有用到
+
   def MyState(self):
     if "robot1" in rospy.get_namespace():
       return self.robot1
@@ -252,7 +250,7 @@ class Robot(object):
       return self.robot3
     else:
       print("Wrong Namespace")
-# 沒有用到
+
   def MyRole(self):
     if "robot1" in rospy.get_namespace():
       return self.r1_role
@@ -263,7 +261,7 @@ class Robot(object):
     else:
       print("Wrong Namespace")
       return "Wrong Namespace"
-# 獲取自己是第幾台機器人
+
   def SetMyRole(self, role):
     if "robot1" in rospy.get_namespace():
       self.r1_role = role
@@ -277,7 +275,7 @@ class Robot(object):
 
   def _Publisher(self, topic, mtype):
     return rospy.Publisher(topic, mtype, queue_size=1)
-# 取得vision檔資料
+
   def _GetVision(self, vision):
     rbx = vision.ball_dis * math.cos(math.radians(vision.ball_ang))
     rby = vision.ball_dis * math.sin(math.radians(vision.ball_ang))
@@ -308,20 +306,20 @@ class Robot(object):
       self.__ball_is_handled = True
     else:
       self.__ball_is_handled = False
-# 球門
+
   def _GetTwopoint(self,vision):
     self.__twopoint_info['Blue']['right']   = vision.blue_right
     self.__twopoint_info['Blue']['left']    = vision.blue_left
     self.__twopoint_info['Yellow']['right'] = vision.yellow_right
     self.__twopoint_info['Yellow']['left']  = vision.yellow_left
-# 掃描線
+
   def _GetBlackItemInfo(self, vision):
     self.__obstacle_info['ranges'] =vision.data
-# imu
+
   def _GetImu(self, imu_3d):
     front_ang = math.degrees(imu_3d.yaw) + 90 
     self.__robot_info['imu_3d']['yaw'] = imu_3d.yaw  #caculate front angle by imu
-# 定位
+
   def _GetPosition(self,loc):
     self.__robot_info['location']['x'] = loc.pose.pose.position.x*100
     self.__robot_info['location']['y'] = loc.pose.pose.position.y*100
@@ -331,8 +329,7 @@ class Robot(object):
     qw = loc.pose.pose.orientation.w
     self.__robot_info['location']['yaw'] = math.atan2(2 * (qx*qy + qw*qz), qw*qw + qx*qx - qy*qy - qz*qz)\
                                            / math.pi * 180  #caculate front angle by self_localization
-      
- #  機器人狀態發佈ROS
+                                                                                                                                         
   def RobotStatePub(self, state):
     m = RobotState()
     m.state = state
@@ -342,7 +339,7 @@ class Robot(object):
     m.position.linear.y  = self.__robot_info['location']['y']
     m.position.angular.z = self.__robot_info['location']['yaw']
     self.state_pub.publish(m)
-#  PWM
+
   def ConvertSpeedToPWM(self, x, y):
     reducer = 24
     max_rpm = 7580
@@ -351,12 +348,12 @@ class Robot(object):
     _x = (x / circumference * reducer * 60)/max_rpm * 100
     _y = (y / circumference * reducer * 60)/max_rpm * 100
     return _x, _y
-# (不確定) 坐標系轉換
+
   def Rotate(self, x, y, theta):
     _x = x*math.cos(math.radians(theta)) - y*math.sin(math.radians(theta))
     _y = x*math.sin(math.radians(theta)) + y*math.cos(math.radians(theta))
     return _x, _y
-# 重複
+
   def ConvertSpeedToPWM(self, x, y):
     reducer = 24
     max_rpm = 7580
@@ -365,7 +362,7 @@ class Robot(object):
     _x = (x / circumference * reducer * 60)/max_rpm * 100
     _y = (y / circumference * reducer * 60)/max_rpm * 100
     return _x, _y
-# 輸出移動控制
+
   def RobotCtrlS(self, x, y, yaw, pass_through=False):
     if pass_through:
       msg = Twist()
