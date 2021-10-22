@@ -86,16 +86,17 @@ class Core(Robot, StateMachine):
         self.left_ang = 0
         self.dest_angle = 0
         dsrv = DynamicReconfigureServer(RobotConfig, self.Callback)
-    # 待機
 
-    def on_toIdle(self):
+# ------------------------------------------------------------------------
+#   the function of entering the state
+# ------------------------------------------------------------------------
+    def on_toIdle(self):    # 待機
         Core.last_goal_dis = 0
         for i in range(0, 10):
             self.MotionCtrl(0, 0, 0)
         log("To Idle1")
-    # 追球
 
-    def on_toChase(self, method="Classic"):
+    def on_toChase(self, method="Classic"):    # 追球
         Core.last_goal_dis = 0
         t = self.GetObjectInfo()
         side = self.opp_side
@@ -115,9 +116,8 @@ class Core(Robot, StateMachine):
             x = x + t['ball']['speed_pwm_x']
             y = y + t['ball']['speed_pwm_y']
         self.MotionCtrl(x, y, yaw)
-    # 攻擊
 
-    def on_toAttack(self, method="Classic"):
+    def on_toAttack(self, method="Classic"):    # 攻擊
         t = self.GetObjectInfo()
         side = self.opp_side
         l = self.GetObstacleInfo()
@@ -141,13 +141,11 @@ class Core(Robot, StateMachine):
             self.MotionCtrl(x, y, yaw, True)
 
         self.MotionCtrl(x, y, yaw)
-    # 射擊
 
-    def on_toShoot(self, power, pos=1):
+    def on_toShoot(self, power, pos=1):   # 射擊
         self.RobotShoot(power, pos)
-    # 持球走位
 
-    def on_toMovement(self, method):
+    def on_toMovement(self, method):  # 持球走位
         t = self.GetObjectInfo()
         position = self.GetRobotInfo()
         side = self.opp_side
@@ -185,9 +183,8 @@ class Core(Robot, StateMachine):
                                         l['angle']['increment'])
 
             self.MotionCtrl(x, y, yaw)
-    # 跑點
 
-    def on_toPoint(self):
+    def on_toPoint(self):    # 跑點
         t = self.GetObjectInfo()
         our_side = self.our_side
         opp_side = self.opp_side
@@ -203,22 +200,25 @@ class Core(Robot, StateMachine):
 
         self.MotionCtrl(x, y, yaw)
         return arrived
-# 上傳狀態到ROS
+# ------------------------------------------------------------------------
+#   Robot information
+# ------------------------------------------------------------------------
 
-    def PubCurrentState(self):
+    def PubCurrentState(self):  # 上傳狀態到ROS
         self.RobotStatePub(self.current_state.identifier)
-# 檢查是否持球
 
-    def CheckBallHandle(self):
+    def CheckBallHandle(self):   # 檢查是否持球
         if self.RobotBallHandle():
             # Back to normal from Accelerator
             self.ChangeVelocityRange(self.minimum_v, self.maximum_v)
             Core.last_ball_dis = 0
 
         return self.RobotBallHandle()
-# 不知道 ！！！！！！！！！！！！
+# ------------------------------------------------------------------------
+#   Robot operating function
+# ------------------------------------------------------------------------
 
-    def Accelerator(self, exceed=100):
+    def Accelerator(self, exceed=100):  # 加速函式
         t = self.GetObjectInfo()
         if Core.last_ball_dis == 0:
             Core.last_time = time.time()
@@ -229,9 +229,8 @@ class Core(Robot, StateMachine):
         else:
             Core.last_time = time.time()
             Core.last_ball_dis = t['ball']['dis']
-# 防守策略，當今天機器人在防守狀態的時候，搶到球之後切換成攻擊策略
 
-    def Change_Plan(self, exceed=100):
+    def Change_Plan(self, exceed=100):    # 防守策略，當今天機器人在防守狀態的時候，搶到球之後切換成攻擊策略
         t = self.GetObjectInfo()
         opp_side = self.opp_side
         if Core.last_goal_dis == 0:
@@ -263,9 +262,8 @@ class Strategy(object):
         self.dclient = dynamic_reconfigure.client.Client(
             "core", timeout=30, config_callback=None)
         self.main()
-# 去跑點並指定跑點策略
 
-    def RunStatePoint(self):
+    def RunStatePoint(self):   # 去跑點並指定跑點策略
         print("run point")
         if self.robot.run_point == "ball_hand":
             if self.robot.toPoint():
@@ -275,9 +273,8 @@ class Strategy(object):
             if self.robot.toPoint():
                 self.dclient.update_configuration({"run_point": "none"})
                 self.ToChase()
-# 去追球並指定追求策略
 
-    def ToChase(self):
+    def ToChase(self):    # 去追球並指定追求策略
         mode = self.robot.attack_mode
         if mode == "Defense":
             self.ToMovement()
@@ -287,9 +284,8 @@ class Strategy(object):
                 self.robot.toChase("Classic")
             else:
                 self.robot.toChase("Straight")
-# 去攻擊並指定攻擊策略
 
-    def ToAttack(self):
+    def ToAttack(self):    # 去攻擊並指定攻擊策略
         mode = self.robot.attack_mode
         if mode == "Attack":
             if self.robot.change_plan:
@@ -301,19 +297,16 @@ class Strategy(object):
             self.robot.toAttack("Post_up")
         elif mode == "Orbit":
             self.robot.toAttack("Orbit")
-# 去走位並指定走位策略
 
-    def ToMovement(self):
+    def ToMovement(self):     # 去走位並指定走位策略
         mode = self.robot.strategy_mode
         state = self.robot.game_state
         point = self.robot.run_point
-        # log(point)
         if point == "ball_hand":
             self.RunStatePoint()
         elif state == "Penalty_Kick":
             self.robot.toMovement("Penalty_Kick")
         elif mode == "At_Post_up":
-            # log("movement")
             self.robot.toMovement("At_Post_up")
         elif mode == "At_Orbit":
             self.robot.toMovement("Orbit")
@@ -324,7 +317,6 @@ class Strategy(object):
         elif mode == "Fast_break":
             self.ToAttack()
 
-    # 這裡可以直接看狀態機（內含狀態機指向）
     def main(self):
         while not rospy.is_shutdown():
             self.robot.PubCurrentState()
@@ -441,7 +433,6 @@ class Strategy(object):
                 self.rate.sleep()
 
 
-# 判斷是否是模擬器和時機測試
 if __name__ == '__main__':
     try:
         if SysCheck(sys.argv[1:]) == "Native Mode":
